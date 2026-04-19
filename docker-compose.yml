@@ -2,23 +2,37 @@ services:
   redis:
     image: redis:alpine
     container_name: nse_redis
-    # Note: host mode doesn't need ports mapped
     network_mode: "host"
+    restart: always
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    container_name: nse_timescale
+    environment:
+      - POSTGRES_USER=nse_admin
+      - POSTGRES_PASSWORD=nse_password
+      - POSTGRES_DB=nse_analytics
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    network_mode: "host"
+    restart: always
 
   backend:
     build: ./backend
     container_name: nse_backend
     network_mode: "host"
-    environment:
-      - ENABLE_LOGGING=true
-      - REDIS_HOST=127.0.0.1 # Since we are in host mode, Redis is at localhost
+    env_file: .env
     depends_on:
+      - timescaledb
       - redis
+    restart: always
 
   frontend:
     build: ./frontend
     container_name: nse_frontend
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://192.168.1.100:8000
+    network_mode: "host"
+    env_file: .env
+    restart: always
+
+volumes:
+  timescale_data:

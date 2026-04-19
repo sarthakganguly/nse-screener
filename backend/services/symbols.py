@@ -24,6 +24,26 @@ def refresh_master_list():
     except Exception as e:
         Logger.error("Failed to refresh Master List", str(e))
 
+def get_top_50_symbols():
+    try:
+        from nsepython import nse_get_index_quote
+        data = nse_get_index_quote("NIFTY 50")
+        
+        # Handle different response structures
+        if isinstance(data, dict) and 'data' in data:
+            raw_list = data['data']
+        elif isinstance(data, list):
+            raw_list = data
+        else:
+            raise ValueError("Unexpected data format from NSE")
+
+        symbols = [item['symbol'] for item in raw_list if 'symbol' in item and item['symbol'] != 'NIFTY 50']
+        return symbols
+    except Exception as e:
+        Logger.error("Failed to fetch Top 50 symbols", str(e))
+        # Fallback if NSE call fails
+        return ["RELIANCE", "TCS", "HDFCBANK", "ICICIBANK", "INFY", "BHARTIARTL", "HINDUNILVR", "ITC", "SBIN", "LICI"]
+
 def search_symbols(query: str):
     query = query.strip().upper()
     search_cache_key = f"search:{query}"

@@ -4,3 +4,5 @@ nsepython
 redis
 requests
 pandas
+psycopg2-binary
+yfinance

@@ -25,6 +25,28 @@ def warm_session():
         Logger.error("Manual Session Warmup Failed", str(e))
         return False
 
+def get_market_status():
+    cache_key = "market_status"
+    cached_status = cache.get(cache_key)
+    if cached_status:
+        return cached_status
+
+    try:
+        from nsepython import nse_marketStatus
+        status_raw = nse_marketStatus()
+        # Find 'Capital Market' status
+        cm_status = "Closed"
+        for item in status_raw.get('marketState', []):
+            if item.get('market') == 'Capital Market':
+                cm_status = item.get('marketStatus', 'Closed')
+                break
+        
+        cache.set(cache_key, cm_status, expire=60) # Cache for 1 minute
+        return cm_status
+    except Exception as e:
+        Logger.error("Failed to fetch market status", str(e))
+        return "Closed"
+
 def get_stock_details(symbol: str):
     symbol = symbol.upper()
     cache_key = f"quote:{symbol}"
