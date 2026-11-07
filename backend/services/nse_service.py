@@ -71,7 +71,11 @@ def get_stock_details(symbol: str):
             intra_day = price_info.get('intraDayHighLow', {})
             
             # 1. Company Name Fallback
-            company_name = metadata.get('companyName') or raw_data.get('info', {}).get('companyName', 'N/A')
+            company_name = (
+                metadata.get('companyName') 
+                or (raw_data.get('info') or {}).get('companyName') 
+                or symbol
+            )
 
             # 2. High/Low Fallback (Post-market keys often differ)
             high = intra_day.get('high') or price_info.get('high') or 0
@@ -79,9 +83,20 @@ def get_stock_details(symbol: str):
             
             # 3. 52 Week High Fallback
             # NSE sometimes puts this in azMarket, sometimes in marketDeptOrderBook
-            h52 = raw_data.get('azMarket', {}).get('high52') or \
-                  raw_data.get('marketDeptOrderBook', {}).get('tradeInfo', {}).get('high52') or \
-                  'N/A'
+            h52 = (
+                (raw_data.get('azMarket') or {}).get('high52') or 
+                (raw_data.get('marketDeptOrderBook') or {}).get('tradeInfo', {}).get('high52') or 
+                'N/A'
+            )
+
+            last_price = (
+                price_info.get('lastPrice') 
+                or price_info.get('close') 
+                or price_info.get('previousClose') 
+                or 0
+            )
+            p_change = price_info.get('pChange') or 0
+            vwa = price_info.get('vwa') or price_info.get('vwap') or 0
 
             formatted_data = {
                 "info": {
@@ -89,13 +104,13 @@ def get_stock_details(symbol: str):
                     "companyName": company_name
                 },
                 "priceInfo": {
-                    "lastPrice": price_info.get('lastPrice', 0),
-                    "pChange": price_info.get('pChange', 0),
+                    "lastPrice": float(last_price) if last_price is not None else 0.0,
+                    "pChange": float(p_change) if p_change is not None else 0.0,
                     "intraDayHighLow": {
-                        "high": high,
-                        "low": low
+                        "high": float(high) if high is not None else 0.0,
+                        "low": float(low) if low is not None else 0.0
                     },
-                    "vwa": price_info.get('vwa') or price_info.get('vwap') or 0
+                    "vwa": float(vwa) if vwa is not None else 0.0
                 },
                 "azMarket": {
                     "high52": h52

@@ -127,7 +127,7 @@ export default function App() {
     }
   };
 
-  const isPositive = stock?.priceInfo?.pChange >= 0;
+  const isPositive = (stock?.priceInfo?.pChange ?? 0) >= 0;
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-200 p-4 md:p-10 font-sans selection:bg-indigo-500/30">
@@ -326,7 +326,9 @@ export default function App() {
                       </button>
                     )}
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-black text-white mb-1 tracking-tight">{stock.info.companyName}</h2>
+                  <h2 className="text-4xl md:text-5xl font-black text-white mb-1 tracking-tight">
+                    {stock.info?.companyName || stock.info?.symbol || 'N/A'}
+                  </h2>
                   <p className="text-slate-400 flex items-center gap-2 text-sm">
                     <Globe size={14} /> National Stock Exchange of India
                   </p>
@@ -335,11 +337,11 @@ export default function App() {
                 <div className="bg-slate-950/50 p-6 rounded-3xl border border-slate-800 flex flex-col items-end">
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Current Market Price</p>
                   <div className="text-5xl font-black text-white mb-2">
-                    ₹{stock.priceInfo.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    ₹{(Number(stock.priceInfo?.lastPrice) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </div>
                   <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-sm ${isPositive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                     {isPositive ? <TrendingUp size={18}/> : <TrendingDown size={18}/>}
-                    {isPositive ? 'UP' : 'DOWN'} {Math.abs(stock.priceInfo.pChange).toFixed(2)}%
+                    {isPositive ? 'UP' : 'DOWN'} {Math.abs(Number(stock.priceInfo?.pChange) || 0).toFixed(2)}%
                   </div>
                 </div>
               </div>
@@ -356,25 +358,25 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard 
                 label="Intraday High" 
-                value={`₹${stock.priceInfo.intraDayHighLow.high}`} 
+                value={stock.priceInfo?.intraDayHighLow?.high != null && stock.priceInfo.intraDayHighLow.high !== 0 ? `₹${stock.priceInfo.intraDayHighLow.high}` : 'N/A'} 
                 icon={<ArrowUpCircle className="text-emerald-500" size={20} />} 
                 desc="Highest price today"
               />
               <StatCard 
                 label="Intraday Low" 
-                value={`₹${stock.priceInfo.intraDayHighLow.low}`} 
+                value={stock.priceInfo?.intraDayHighLow?.low != null && stock.priceInfo.intraDayHighLow.low !== 0 ? `₹${stock.priceInfo.intraDayHighLow.low}` : 'N/A'} 
                 icon={<ArrowDownCircle className="text-rose-500" size={20} />} 
                 desc="Lowest price today"
               />
               <StatCard 
                 label="VWAP" 
-                value={`₹${stock.priceInfo.vwa.toFixed(2)}`} 
+                value={stock.priceInfo?.vwa != null && Number(stock.priceInfo.vwa) !== 0 ? `₹${(Number(stock.priceInfo.vwa) || 0).toFixed(2)}` : 'N/A'} 
                 icon={<Activity className="text-indigo-500" size={20} />} 
                 desc="Volume Weighted Avg"
               />
               <StatCard 
                 label="52-Week High" 
-                value={`₹${stock.azMarket.high52}`} 
+                value={stock.azMarket?.high52 && stock.azMarket.high52 !== 'N/A' ? `₹${stock.azMarket.high52}` : 'N/A'} 
                 icon={<Calendar className="text-amber-500" size={20} />} 
                 desc="Yearly record high"
               />
