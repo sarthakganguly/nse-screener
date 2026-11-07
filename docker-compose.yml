@@ -27,6 +27,8 @@ services:
       - REDIS_HOST=redis
       - DB_URL=postgresql://nse_admin:nse_password@timescaledb:5432/nse_analytics
       - ENABLE_LOGGING=true
+    volumes:
+      - ./backend:/app
     ports:
       - "8005:8000"
     dns:
@@ -42,7 +44,11 @@ services:
     container_name: nse_frontend
     env_file: .env
     environment:
-      - VITE_API_URL=http://localhost:8005/api
+      - VITE_API_URL=/api
+      - VITE_BACKEND_TARGET=http://backend:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     ports:
       - "5173:5173"
     dns:

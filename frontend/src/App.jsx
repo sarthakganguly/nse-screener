@@ -8,8 +8,8 @@ import {
   LineChart as ChartIcon
 } from 'lucide-react';
 
-// Use environment variable with fallback
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+// Use environment variable with fallback to relative /api proxy
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 const BACKFILL_YEARS = 15;
 
 export default function App() {
